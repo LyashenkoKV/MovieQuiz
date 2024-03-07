@@ -15,11 +15,6 @@ final class MovieQuizViewController: UIViewController {
     // Модель Mock-данных
     private let mockData = MockData()
     
-    // Рандомный рейтинг
-//    private var rating: Int {
-//        return Int.random(in: 4...9)
-//    }
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +38,7 @@ final class MovieQuizViewController: UIViewController {
     private func compare(givenAnswer: Bool) {
         let currentQestion = questions[currentQuestionIndex]
         showAnswerResult(isCorrect: givenAnswer == currentQestion.correctAnswer)
-        
+        // Обратить внимание: Из за асинхронной обработки задачи, при быстром ответе на вопросы выскакивает несколько алертов
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.showNextQuestionOrResults()
             self.previewImage.layer.borderWidth = 0
