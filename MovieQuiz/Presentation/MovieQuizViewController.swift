@@ -5,6 +5,8 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private weak var counterLabel: UILabel!
     @IBOutlet private weak var previewImage: UIImageView!
     @IBOutlet private weak var questionLabel: UILabel!
+    @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var noButton: UIButton!
     
     // Массив вопросов
     private var questions: [QuizQuestion] = []
@@ -14,6 +16,8 @@ final class MovieQuizViewController: UIViewController {
     private var correctAnswers = 0
     // Модель Mock-данных
     private let mockData = MockData()
+    // Состояние алерта
+    private var isAlertPresented = false
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -25,11 +29,17 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Methods
     private func showAlert(with result: QuizResultsViewModel) {
+        guard !isAlertPresented else {
+                return
+            }
+            isAlertPresented = true
+        
         let alert = UIAlertController(title: result.title, message: result.text, preferredStyle: .alert)
         let action = UIAlertAction(title: result.butttonText, style: .default) { _ in
             self.currentQuestionIndex = 0
             self.setupQuiz()
             self.correctAnswers = 0
+            self.isAlertPresented = false
         }
         alert.addAction(action)
         self.present(alert, animated: true)
@@ -38,10 +48,12 @@ final class MovieQuizViewController: UIViewController {
     private func compare(givenAnswer: Bool) {
         let currentQestion = questions[currentQuestionIndex]
         showAnswerResult(isCorrect: givenAnswer == currentQestion.correctAnswer)
-        // Обратить внимание: Из за асинхронной обработки задачи, при быстром ответе на вопросы выскакивает несколько алертов
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.showNextQuestionOrResults()
             self.previewImage.layer.borderWidth = 0
+            self.yesButton.isEnabled = true
+            self.noButton.isEnabled = true
         }
     }
     
@@ -85,10 +97,12 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
         compare(givenAnswer: true)
+        sender.isEnabled = false
     }
     
     @IBAction private func noButtonTapped(_ sender: UIButton) {
         compare(givenAnswer: false)
+        sender.isEnabled = false
     }
 }
 // MARK: - QuizQuestion
