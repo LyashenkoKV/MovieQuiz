@@ -29,10 +29,8 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Methods
     private func showAlert(with result: QuizResultsViewModel) {
-        guard !isAlertPresented else {
-                return
-            }
-            isAlertPresented = true
+        guard !isAlertPresented else { return }
+        isAlertPresented = true
         
         let alert = UIAlertController(title: result.title, message: result.text, preferredStyle: .alert)
         let action = UIAlertAction(title: result.butttonText, style: .default) { _ in
@@ -96,13 +94,15 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
         compare(givenAnswer: true)
-        sender.isEnabled = false
     }
     
     @IBAction private func noButtonTapped(_ sender: UIButton) {
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
         compare(givenAnswer: false)
-        sender.isEnabled = false
     }
 }
 // MARK: - QuizQuestion
