@@ -29,6 +29,17 @@ final class MovieQuizViewController: UIViewController {
     }
     
     // MARK: - Methods
+    private func showAlert(with result: QuizResultsViewModel) {
+        let alert = UIAlertController(title: result.title, message: result.text, preferredStyle: .alert)
+        let action = UIAlertAction(title: result.butttonText, style: .default) { _ in
+            self.currentQuestionIndex = 0
+            self.setupQuiz()
+            self.correctAnswers = 0
+        }
+        alert.addAction(action)
+        self.present(alert, animated: true)
+    }
+    
     private func compare(givenAnswer: Bool) {
         let currentQestion = questions[currentQuestionIndex]
         showAnswerResult(isCorrect: givenAnswer == currentQestion.correctAnswer)
@@ -44,10 +55,18 @@ final class MovieQuizViewController: UIViewController {
         previewImage.layer.borderWidth = 8
         previewImage.layer.cornerRadius = 15
         previewImage.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        
+        if isCorrect {
+            correctAnswers += 1
+        }
     }
     
     private func showNextQuestionOrResults() {
+        let result = QuizResultsViewModel(title: "Этот раунд окончен!",
+                                          text: "Ваш результат \(correctAnswers)/\(questions.count)",
+                                          butttonText: "Сыграть еще раз")
         if currentQuestionIndex == questions.count - 1 {
+            showAlert(with: result)
         } else {
             currentQuestionIndex += 1
             setupQuiz()
@@ -145,4 +164,11 @@ fileprivate struct QuizConverter {
                                  question: model.text,
                                  questionNumber: "\(currentIndex)/\(totalCount)")
     }
+}
+
+// MARK: - QuizResultsViewModel
+fileprivate struct QuizResultsViewModel {
+    let title: String
+    let text: String
+    let butttonText: String
 }
