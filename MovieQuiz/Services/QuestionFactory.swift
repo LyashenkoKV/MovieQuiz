@@ -10,6 +10,7 @@ import Foundation
 final class QuestionFactory: QuestionFactoryProtocol {
     
     weak var delegate: QuestionFactoryDelegate?
+    private var askedQuestions: Set<Int> = Set()
 
     static private let quest = "Рейтинг этого фильма больше чем 6?"
     private let questions: [QuizQuestion] = [
@@ -56,11 +57,22 @@ final class QuestionFactory: QuestionFactoryProtocol {
         ]
     
     func requestNextQuestion() {
-        guard let index = (0..<questions.count).randomElement() else {
+        guard questions.count > 0 else {
             delegate?.didReceiveNextQuestion(question: nil)
             return
         }
-        let question = questions[safe: index]
+        var randomIndex: Int
+        
+        repeat {
+            randomIndex = Int.random(in: 0..<questions.count)
+        } while askedQuestions.contains(randomIndex)
+        
+        let question = questions[safe: randomIndex]
+        askedQuestions.insert(randomIndex)
         delegate?.didReceiveNextQuestion(question: question)
+    }
+    
+    func resetState() {
+        askedQuestions.removeAll()
     }
 }
