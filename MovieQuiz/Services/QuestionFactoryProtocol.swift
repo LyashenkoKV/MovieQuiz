@@ -9,6 +9,5 @@ import Foundation
 
 protocol QuestionFactoryProtocol {
     func requestNextQuestion()
-    // Метод очищающий множество вопросов
     func resetState()
 }

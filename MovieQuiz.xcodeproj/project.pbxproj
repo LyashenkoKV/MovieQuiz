@@ -91,7 +91,6 @@
 				24AF984F2BA844C100DD40F7 /* QuestionFactory.swift */,
 				24AF98592BA98C4E00DD40F7 /* QuestionFactoryProtocol.swift */,
 				24AF985B2BA9DE6800DD40F7 /* QuestionFactoryDelegate.swift */,
-				24AF98652BAADEE300DD40F7 /* AlertPresenterDelegate.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -101,6 +100,7 @@
 			children = (
 				AD1ABAB52831907B00B3E448 /* MovieQuizViewController.swift */,
 				24AF985F2BAAD1E600DD40F7 /* AlertPresenter.swift */,
+				24AF98652BAADEE300DD40F7 /* AlertPresenterDelegate.swift */,
 				AD1ABAB72831907B00B3E448 /* Main.storyboard */,
 			);
 			path = Presentation;
