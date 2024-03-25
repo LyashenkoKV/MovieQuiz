@@ -14,6 +14,9 @@ private enum Keys: String {
 final class StatisticServiceImplementation: StatisticServiceProtocol {
     
     private let userDefaults = UserDefaults.standard
+    private var totalCorrectAnswers = 0
+    private var totalQuestionsAnswered: Int = 0
+    
     // Количество сыграных квизов
     var gamesCount: Int {
         get {
@@ -59,9 +62,10 @@ final class StatisticServiceImplementation: StatisticServiceProtocol {
             bestGame = currentBestRecord
         }
         gamesCount += 1
-        
-        let total = currentBestRecord.correct * gamesCount
-        let newTotalAccurancy = Double(total) / Double(gamesCount * amount) * 100
-        totalAccuracy = newTotalAccurancy
+        totalCorrectAnswers += count
+        totalQuestionsAnswered += amount
+
+        let newTotalAccuracy = Double(totalCorrectAnswers) / Double(totalQuestionsAnswered) * 100
+        totalAccuracy = newTotalAccuracy
     }
 }
