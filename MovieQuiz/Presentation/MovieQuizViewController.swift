@@ -22,6 +22,12 @@ final class MovieQuizViewController: UIViewController {
     private var alertPresenter = AlertPresenter()
     // Состояние алерта
     private var isAlertPresented = false
+    // Статистика игр
+    private var statisticService: StatisticServiceProtocol?
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -32,7 +38,7 @@ final class MovieQuizViewController: UIViewController {
         questionFactory.delegate = self
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
-        
+        statisticService = StatisticServiceImplementation()
         alertPresenter.delegate = self
     }
     
@@ -62,16 +68,18 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showNextQuestionOrResults() {
-        let resultModel = AlertModel(title: "Этот раунд окончен!",
-                                     message: "Ваш результат \(correctAnswers)/\(questionsAmount)",
-                                     buttonText: "Сыграть еще раз") { [weak self] in
-            self?.restartQuiz()
-        }
+        guard let statisticService = statisticService else { return }
+        
         if currentQuestionIndex == questionsAmount - 1 {
-//            let text = correctAnswers == questionsAmount ?
-//            "Поздравляем, вы ответили на 10 из 10!" :
-//            "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
-            alertPresenter.showAlert(with: resultModel)
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
+            let bestGame = statisticService.bestGame
+            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(statisticService.gamesCount)\nРекорд: \(bestGame.correct)/\(questionsAmount) (\(bestGame.date.dateTimeString))\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+            let statistic = AlertModel(title: "Этот раунд окончен!",
+                                       message: message,
+                                       buttonText: "Сыграть еще раз") {
+                self.restartQuiz()
+            }
+            alertPresenter.showAlert(with: statistic)
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
