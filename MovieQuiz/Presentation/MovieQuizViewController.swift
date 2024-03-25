@@ -121,8 +121,8 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
         let viewModel = QuizConverter.convert(model: question,
                                               currentIndex: currentQuestionIndex + 1,
                                               totalCount: questionsAmount)
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
+        DispatchQueue.main.async {
+            self.show(quiz: viewModel)
         }
     }
 }
