@@ -126,7 +126,7 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
         }
     }
 }
-
+// MARK: - AlertPresenterDelegate
 extension MovieQuizViewController: AlertPresenterDelegate {
     func showAlert(with model: AlertModel) {
         guard !isAlertPresented else { return }
