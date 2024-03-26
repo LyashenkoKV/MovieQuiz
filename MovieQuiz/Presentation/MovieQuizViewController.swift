@@ -20,8 +20,6 @@ final class MovieQuizViewController: UIViewController {
     private var currentQuestion: QuizQuestion?
     // Показ результатов
     private var alertPresenter = AlertPresenter()
-    // Состояние алерта
-    private var isAlertPresented = false
     // Статистика игр
     private var statisticService: StatisticServiceProtocol?
     
@@ -130,9 +128,5 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
 extension MovieQuizViewController: AlertPresenterDelegate {
     func presentAlert(_ alert: UIAlertController) {
         present(alert, animated: true)
-    }
-    
-    func dismissAlert() {
-        isAlertPresented = false
     }
 }

@@ -13,10 +13,8 @@ final class AlertPresenter {
     
     func showAlert(with model: AlertModel) {
         let alert = UIAlertController(title: model.title, message: model.message, preferredStyle: .alert)
-        let action = UIAlertAction(title: model.buttonText, style: .default) { [weak self] _ in
-            guard let self = self else { return }
+        let action = UIAlertAction(title: model.buttonText, style: .default) {_ in 
             model.completion?()
-            self.delegate?.dismissAlert()
         }
         alert.addAction(action)
         delegate?.presentAlert(alert)
