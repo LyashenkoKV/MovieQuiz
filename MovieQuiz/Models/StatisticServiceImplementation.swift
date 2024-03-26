@@ -46,10 +46,10 @@ final class StatisticServiceImplementation: StatisticServiceProtocol {
     // Средняя точность
     var totalAccuracy: Double {
         get {
-            userDefaults.double(forKey: Keys.total.rawValue)
-        }
-        set {
-            userDefaults.set(newValue, forKey: Keys.total.rawValue)
+            guard totalQuestionsAnswered > 0 else {
+                return 0
+            }
+            return Double(totalCorrectAnswers) / Double(totalQuestionsAnswered) * 100
         }
     }
     
@@ -65,7 +65,7 @@ final class StatisticServiceImplementation: StatisticServiceProtocol {
         totalCorrectAnswers += count
         totalQuestionsAnswered += amount
 
-        let newTotalAccuracy = Double(totalCorrectAnswers) / Double(totalQuestionsAnswered) * 100
-        totalAccuracy = newTotalAccuracy
+        userDefaults.set(totalCorrectAnswers, forKey: Keys.correct.rawValue)
+        userDefaults.set(totalQuestionsAnswered, forKey: Keys.total.rawValue)
     }
 }
