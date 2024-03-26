@@ -128,17 +128,11 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
 }
 // MARK: - AlertPresenterDelegate
 extension MovieQuizViewController: AlertPresenterDelegate {
-    func showAlert(with model: AlertModel) {
-        guard !isAlertPresented else { return }
-        isAlertPresented = true
-        
-        let alert = UIAlertController(title: model.title, message: model.message, preferredStyle: .alert)
-        let action = UIAlertAction(title: model.buttonText, style: .default) { [weak self] _ in
-            guard let self = self else { return }
-            model.completion?()
-            self.isAlertPresented = false
-        }
-        alert.addAction(action)
-        self.present(alert, animated: true)
+    func presentAlert(_ alert: UIAlertController) {
+        present(alert, animated: true)
+    }
+    
+    func dismissAlert() {
+        isAlertPresented = false
     }
 }

@@ -5,8 +5,9 @@
 //  Created by Konstantin Lyashenko on 20.03.2024.
 //
 
-import Foundation
+import UIKit
 
 protocol AlertPresenterDelegate: AnyObject {
-    func showAlert(with model: AlertModel)
+    func presentAlert(_ alert: UIAlertController)
+    func dismissAlert()
 }
