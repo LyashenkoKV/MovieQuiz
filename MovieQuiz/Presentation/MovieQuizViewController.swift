@@ -127,6 +127,8 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
 // MARK: - AlertPresenterDelegate
 extension MovieQuizViewController: AlertPresenterDelegate {
     func presentAlert(_ alert: UIAlertController) {
-        present(alert, animated: true)
+        DispatchQueue.main.async {
+            self.present(alert, animated: true)
+        }
     }
 }
