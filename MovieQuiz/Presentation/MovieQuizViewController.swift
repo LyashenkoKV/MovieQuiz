@@ -7,6 +7,7 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private weak var questionLabel: UILabel!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // Индекс текущего вопроса
     private var currentQuestionIndex = 0
@@ -74,7 +75,8 @@ final class MovieQuizViewController: UIViewController {
             let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(statisticService.gamesCount)\nРекорд: \(bestGame.correct)/\(questionsAmount) (\(bestGame.date.dateTimeString))\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
             let statistic = AlertModel(title: "Этот раунд окончен!",
                                        message: message,
-                                       buttonText: "Сыграть еще раз") {
+                                       buttonText: "Сыграть еще раз") { [weak self] in
+                guard let self else { return }
                 self.restartQuiz()
             }
             alertPresenter.showAlert(with: statistic)
@@ -95,6 +97,25 @@ final class MovieQuizViewController: UIViewController {
         counterLabel.text = step.questionNumber
         previewImage.image = step.image
         questionLabel.text = step.question
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз?") { [weak self] in
+            guard let self else { return }
+            self.restartQuiz()
+        }
+        alertPresenter.showAlert(with: model)
     }
     
     // MARK: - IBActions
