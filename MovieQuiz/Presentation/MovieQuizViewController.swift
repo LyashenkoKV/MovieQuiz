@@ -14,7 +14,7 @@ final class MovieQuizViewController: UIViewController {
     // Счетчик правильных ответов
     private var correctAnswers = 0
     // Общее количество вопросов
-    private let questionsAmount = 10
+    private var questionsAmount = 0
     // Фабрика вопросов
     private var questionFactory: QuestionFactoryProtocol?
     // Вопрос, который видит пользователь
@@ -23,6 +23,8 @@ final class MovieQuizViewController: UIViewController {
     private var alertPresenter = AlertPresenter()
     // Статистика игр
     private var statisticService: StatisticServiceProtocol?
+    // Загрузчик фильмов
+    private var moviesLoader: MoviesLoading?
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -33,10 +35,13 @@ final class MovieQuizViewController: UIViewController {
         super.viewDidLoad()
         previewImage.layer.cornerRadius = 15
         
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
+        let moviesLoader = MoviesLoader()
+        let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader)
+        
         self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
+        showLoadingIndicator()
+        questionFactory.loadData()
+        
         statisticService = StatisticServiceImplementation()
         alertPresenter.delegate = self
     }
@@ -100,13 +105,17 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
-        activityIndicator.startAnimating()
+        DispatchQueue.main.async {
+            self.activityIndicator.isHidden = false
+            self.activityIndicator.startAnimating()
+        }
     }
     
     private func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
-        activityIndicator.stopAnimating()
+        DispatchQueue.main.async {
+            self.activityIndicator.isHidden = true
+            self.activityIndicator.stopAnimating()
+        }
     }
     
     private func showNetworkError(message: String) {
@@ -134,6 +143,18 @@ final class MovieQuizViewController: UIViewController {
 
 // MARK: - QuestionFactoryDelegate
 extension MovieQuizViewController: QuestionFactoryDelegate {
+    func didLoadDataFromServer() {
+        DispatchQueue.main.async {
+            self.activityIndicator.isHidden = true
+        }
+        questionsAmount = questionFactory?.numberOfMovies() ?? 0
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else { return }
         currentQuestion = question
