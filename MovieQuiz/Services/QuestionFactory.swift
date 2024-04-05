@@ -8,15 +8,16 @@
 import Foundation
 
 final class QuestionFactory: QuestionFactoryProtocol {
-    
     weak var delegate: QuestionFactoryDelegate?
     private let moviesLoader: MoviesLoading
     private var askedQuestions: Set<Int> = Set()
     private var movies: [MostPopularMovie] = []
+    var errorHandler: ((Error) -> Void)?
     
-    init(delegate: QuestionFactoryDelegate?, moviesLoader: MoviesLoading) {
+    init(delegate: QuestionFactoryDelegate?, moviesLoader: MoviesLoading, errorHandler: ((Error) -> Void)?) {
         self.delegate = delegate
         self.moviesLoader = moviesLoader
+        self.errorHandler = errorHandler
     }
     
     func loadData() {
@@ -54,14 +55,27 @@ final class QuestionFactory: QuestionFactoryProtocol {
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
-                print("Failed to load image")
+                errorHandler?(error)
+                return
             }
             
             let rating = Float(movie.rating ?? "") ?? 0
-            let randomRating = Int.random(in: 7...9)
-            let text = "Рейтинг этого фильма больше чем \(randomRating)?"
-            let correctAnswer = rating > Float(randomRating)
+            let randomRating = Int.random(in: 6...9)
+            var compare: String
+            let correctAnswer: Bool
             
+            if Int(rating) > randomRating {
+                compare = "больше"
+                correctAnswer = true
+            } else if Int(rating) < randomRating {
+                compare = "меньше"
+                correctAnswer = false
+            } else {
+                compare = "равен"
+                correctAnswer = true
+            }
+            
+            let text = "Рейтинг этого фильма \(compare) \(randomRating)?"
             let question = QuizQuestion(image: imageData, text: text, correctAnswer: correctAnswer)
             askedQuestions.insert(randomIndex)
             
@@ -71,7 +85,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
             }
         }
     }
-    
+
     func resetState() {
         askedQuestions.removeAll()
     }

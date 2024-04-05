@@ -34,12 +34,16 @@ final class MovieQuizViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         previewImage.layer.cornerRadius = 15
+        activityIndicator.hidesWhenStopped = true
         
         let moviesLoader = MoviesLoader()
-        let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader)
+        let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] _ in
+            guard let self else { return }
+            self.showError(message: "Не удалось загрузить изображение")
+        }
         
         self.questionFactory = questionFactory
-        showLoadingIndicator()
+        activityIndicator.startAnimating()
         questionFactory.loadData()
         
         statisticService = StatisticServiceImplementation()
@@ -104,24 +108,17 @@ final class MovieQuizViewController: UIViewController {
         questionLabel.text = step.question
     }
     
-    private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
-        activityIndicator.startAnimating()
-    }
-    
-    private func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
-        activityIndicator.stopAnimating()
-    }
-    
-    private func showNetworkError(message: String) {
-        hideLoadingIndicator()
-        let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз?") { [weak self] in
-            guard let self else { return }
-            self.restartQuiz()
+    private func showError(message: String) {
+        DispatchQueue.main.async {
+            self.activityIndicator.stopAnimating()
+            let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз?") { [weak self] in
+                guard let self else { return }
+                self.restartQuiz()
+            }
+            self.alertPresenter.showAlert(with: model)
         }
-        alertPresenter.showAlert(with: model)
     }
+    
     
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
@@ -140,12 +137,28 @@ final class MovieQuizViewController: UIViewController {
 // MARK: - QuestionFactoryDelegate
 extension MovieQuizViewController: QuestionFactoryDelegate {
     func didLoadDataFromServer() {
-        activityIndicator.isHidden = true
+        activityIndicator.startAnimating()
         questionFactory?.requestNextQuestion()
     }
     
     func didFailToLoadData(with error: Error) {
-        showNetworkError(message: error.localizedDescription)
+        var errorMessage = "Произошла ошибка при загрузке данных"
+        
+        if let networkError = error as? NetworkError {
+            switch networkError {
+            case .noInternetConnection:
+                errorMessage = "Отсутствует подключение к интернету"
+            case .requestTimedOut:
+                errorMessage = "Превышено время ожидания ответа от сервера"
+            case .emptyData:
+                errorMessage = "Данные не были получены"
+            case .tooManyRequests:
+                errorMessage = "Вы превысили лимит запросов к API. Попробуйте снова позже."
+            case .unknownError:
+                errorMessage = "Неизвестная ошибка"
+            }
+        }
+        showError(message: errorMessage)
     }
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -156,6 +169,7 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
                                               totalCount: questionsAmount)
         DispatchQueue.main.async {
             self.show(quiz: viewModel)
+            self.activityIndicator.stopAnimating()
         }
     }
 }

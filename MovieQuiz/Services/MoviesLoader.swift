@@ -31,6 +31,7 @@ struct MoviesLoader: MoviesLoading {
                     let decodedData = try decoder.decode(MostPopularMovies.self, from: data)
                     handler(.success(decodedData))
                 } catch {
+                    print(error.localizedDescription)
                     handler(.failure(error))
                 }
             case .failure(let error):
