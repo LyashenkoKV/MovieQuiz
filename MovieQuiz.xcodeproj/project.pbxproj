@@ -110,9 +110,9 @@
 				24AF985B2BA9DE6800DD40F7 /* QuestionFactoryDelegate.swift */,
 				24AF98652BAADEE300DD40F7 /* AlertPresenterDelegate.swift */,
 				24AF98692BADA76000DD40F7 /* StatisticServiceProtocol.swift */,
+				24AF989B2BBE95F800DD40F7 /* MoviesLoadingProtocol.swift */,
 				24AF98932BBD517B00DD40F7 /* NetworkClient.swift */,
 				24AF98972BBD6EB300DD40F7 /* MoviesLoader.swift */,
-				24AF989B2BBE95F800DD40F7 /* MoviesLoadingProtocol.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";

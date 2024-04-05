@@ -14,7 +14,7 @@ final class MovieQuizViewController: UIViewController {
     // Счетчик правильных ответов
     private var correctAnswers = 0
     // Общее количество вопросов
-    private var questionsAmount = 0
+    private var questionsAmount = 10
     // Фабрика вопросов
     private var questionFactory: QuestionFactoryProtocol?
     // Вопрос, который видит пользователь
@@ -105,17 +105,13 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showLoadingIndicator() {
-        DispatchQueue.main.async {
-            self.activityIndicator.isHidden = false
-            self.activityIndicator.startAnimating()
-        }
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
     }
     
     private func hideLoadingIndicator() {
-        DispatchQueue.main.async {
-            self.activityIndicator.isHidden = true
-            self.activityIndicator.stopAnimating()
-        }
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
     }
     
     private func showNetworkError(message: String) {
@@ -144,10 +140,7 @@ final class MovieQuizViewController: UIViewController {
 // MARK: - QuestionFactoryDelegate
 extension MovieQuizViewController: QuestionFactoryDelegate {
     func didLoadDataFromServer() {
-        DispatchQueue.main.async {
-            self.activityIndicator.isHidden = true
-        }
-        questionsAmount = questionFactory?.numberOfMovies() ?? 0
+        activityIndicator.isHidden = true
         questionFactory?.requestNextQuestion()
     }
     

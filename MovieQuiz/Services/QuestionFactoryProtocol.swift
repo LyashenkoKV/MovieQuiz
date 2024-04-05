@@ -11,5 +11,4 @@ protocol QuestionFactoryProtocol {
     func requestNextQuestion()
     func loadData()
     func resetState()
-    func numberOfMovies() -> Int
 }

@@ -75,8 +75,4 @@ final class QuestionFactory: QuestionFactoryProtocol {
     func resetState() {
         askedQuestions.removeAll()
     }
-    
-    func numberOfMovies() -> Int {
-        return movies.count
-    }
 }
