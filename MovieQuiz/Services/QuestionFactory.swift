@@ -60,16 +60,17 @@ final class QuestionFactory: QuestionFactoryProtocol {
             }
             
             let rating = Float(movie.rating ?? "") ?? 0
+            print(rating)
             let randomRating = Int.random(in: 6...9)
             var compare: String
             let correctAnswer: Bool
             
-            if Int(rating) > randomRating {
+            if rating > Float(randomRating) {
                 compare = "больше"
                 correctAnswer = true
-            } else if Int(rating) < randomRating {
+            } else if rating < Float(randomRating) {
                 compare = "меньше"
-                correctAnswer = false
+                correctAnswer = true
             } else {
                 compare = "равен"
                 correctAnswer = true
