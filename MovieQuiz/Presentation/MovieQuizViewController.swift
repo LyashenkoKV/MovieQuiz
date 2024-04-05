@@ -112,13 +112,21 @@ final class MovieQuizViewController: UIViewController {
         DispatchQueue.main.async {
             self.activityIndicator.stopAnimating()
             let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз?") { [weak self] in
-                guard let self else { return }
-                self.restartQuiz()
+                guard let self = self else { return }
+                self.activityIndicator.startAnimating()
+                self.moviesLoader?.loadMovies { result in
+                    switch result {
+                    case .success(_):
+                        self.restartQuiz()
+                    case .failure(let error):
+                        self.showError(message: error.localizedDescription)
+                    }
+                }
             }
             self.alertPresenter.showAlert(with: model)
         }
     }
-    
+
     
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
