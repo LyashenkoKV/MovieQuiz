@@ -29,7 +29,12 @@ struct MoviesLoader: MoviesLoading {
             case .success(let data):
                 do {
                     let decodedData = try decoder.decode(MostPopularMovies.self, from: data)
-                    handler(.success(decodedData))
+                    if decodedData.items.isEmpty {
+                        let error = NSError(domain: "MoviesLoader", code: 400, userInfo: [NSLocalizedDescriptionKey: decodedData.errorMessage])
+                        handler(.failure(error))
+                    } else {
+                        handler(.success(decodedData))
+                    }
                 } catch {
                     print(error.localizedDescription)
                     handler(.failure(error))
