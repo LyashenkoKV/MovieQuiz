@@ -7,13 +7,14 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private weak var questionLabel: UILabel!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // Индекс текущего вопроса
     private var currentQuestionIndex = 0
     // Счетчик правильных ответов
     private var correctAnswers = 0
     // Общее количество вопросов
-    private let questionsAmount = 10
+    private var questionsAmount = 10
     // Фабрика вопросов
     private var questionFactory: QuestionFactoryProtocol?
     // Вопрос, который видит пользователь
@@ -22,6 +23,8 @@ final class MovieQuizViewController: UIViewController {
     private var alertPresenter = AlertPresenter()
     // Статистика игр
     private var statisticService: StatisticServiceProtocol?
+    // Загрузчик фильмов
+    private var moviesLoader: MoviesLoading?
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -31,11 +34,18 @@ final class MovieQuizViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         previewImage.layer.cornerRadius = 15
+        activityIndicator.hidesWhenStopped = true
         
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
+        let moviesLoader = MoviesLoader()
+        let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] _ in
+            guard let self else { return }
+            self.showError(message: "Не удалось загрузить изображение")
+        }
+        
         self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
+        activityIndicator.startAnimating()
+        questionFactory.loadData()
+        
         statisticService = StatisticServiceImplementation()
         alertPresenter.delegate = self
     }
@@ -74,7 +84,8 @@ final class MovieQuizViewController: UIViewController {
             let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(statisticService.gamesCount)\nРекорд: \(bestGame.correct)/\(questionsAmount) (\(bestGame.date.dateTimeString))\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
             let statistic = AlertModel(title: "Этот раунд окончен!",
                                        message: message,
-                                       buttonText: "Сыграть еще раз") {
+                                       buttonText: "Сыграть еще раз") { [weak self] in
+                guard let self else { return }
                 self.restartQuiz()
             }
             alertPresenter.showAlert(with: statistic)
@@ -97,6 +108,26 @@ final class MovieQuizViewController: UIViewController {
         questionLabel.text = step.question
     }
     
+    private func showError(message: String) {
+        DispatchQueue.main.async {
+            self.activityIndicator.stopAnimating()
+            let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз?") { [weak self] in
+                guard let self = self else { return }
+                self.activityIndicator.startAnimating()
+                self.moviesLoader?.loadMovies { result in
+                    switch result {
+                    case .success(_):
+                        self.restartQuiz()
+                    case .failure(let error):
+                        self.showError(message: error.localizedDescription)
+                    }
+                }
+            }
+            self.alertPresenter.showAlert(with: model)
+        }
+    }
+
+    
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
         yesButton.isEnabled = false
@@ -113,6 +144,31 @@ final class MovieQuizViewController: UIViewController {
 
 // MARK: - QuestionFactoryDelegate
 extension MovieQuizViewController: QuestionFactoryDelegate {
+    func didLoadDataFromServer() {
+        activityIndicator.startAnimating()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        var errorMessage = "Произошла ошибка при загрузке данных"
+        
+        if let networkError = error as? NetworkError {
+            switch networkError {
+            case .noInternetConnection:
+                errorMessage = "Отсутствует подключение к интернету"
+            case .requestTimedOut:
+                errorMessage = "Превышено время ожидания ответа от сервера"
+            case .emptyData:
+                errorMessage = "Данные не были получены"
+            case .tooManyRequests:
+                errorMessage = "Вы превысили лимит запросов к API. Попробуйте снова позже."
+            case .unknownError:
+                errorMessage = "Неизвестная ошибка"
+            }
+        }
+        showError(message: errorMessage)
+    }
+    
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else { return }
         currentQuestion = question
@@ -121,6 +177,7 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
                                               totalCount: questionsAmount)
         DispatchQueue.main.async {
             self.show(quiz: viewModel)
+            self.activityIndicator.stopAnimating()
         }
     }
 }
