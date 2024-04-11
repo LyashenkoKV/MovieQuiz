@@ -9,9 +9,13 @@ import Foundation
 
 struct MoviesLoader: MoviesLoading {
     // MARK: - NetworkClient
-    private let networkClient = NetworkClient()
+    private let networkClient: NetworkRoutingProtocol
     private let imdbURL = "https://tv-api.com/en/API/Top250Movies/"
     private let apiKeys = "k_zcuw1ytf"
+    
+    init(networkClient: NetworkRoutingProtocol = NetworkClient()) {
+        self.networkClient = networkClient
+    }
     
     // MARK: - URL
     private var mostPopularMoviesUrl: URL {
