@@ -40,7 +40,6 @@ struct MoviesLoader: MoviesLoading {
                         handler(.success(decodedData))
                     }
                 } catch {
-                    print(error.localizedDescription)
                     handler(.failure(error))
                 }
             case .failure(let error):

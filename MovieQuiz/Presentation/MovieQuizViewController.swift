@@ -37,9 +37,12 @@ final class MovieQuizViewController: UIViewController {
         activityIndicator.hidesWhenStopped = true
         
         let moviesLoader = MoviesLoader()
-        let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] _ in
+        let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] error in
             guard let self else { return }
-            self.showError(message: "Не удалось загрузить изображение")
+            let errorMessage = NetworkErrorHandler.errorMessage(from: error)
+            self.showError(message: errorMessage) {
+                self.restartQuiz()
+            }
         }
         
         self.questionFactory = questionFactory
@@ -110,7 +113,7 @@ final class MovieQuizViewController: UIViewController {
         questionLabel.text = step.question
     }
     
-    private func showError(message: String) {
+    private func showError(message: String, errorHandler: (() -> Void)? = nil) {
         let buttonText = "Попробовать еще раз?"
         let title = "Ошибка"
         DispatchQueue.main.async {
@@ -118,14 +121,7 @@ final class MovieQuizViewController: UIViewController {
             let model = AlertModel(title: title, message: message, buttonText: buttonText, context: .error) { [weak self] in
                 guard let self = self else { return }
                 self.activityIndicator.startAnimating()
-                self.moviesLoader?.loadMovies { result in
-                    switch result {
-                    case .success(_):
-                        self.restartQuiz()
-                    case .failure(let error):
-                        self.showError(message: error.localizedDescription)
-                    }
-                }
+                errorHandler?()
             }
             self.alertPresenter.showAlert(with: model)
         }
@@ -153,22 +149,7 @@ extension MovieQuizViewController: QuestionFactoryDelegate {
     }
     
     func didFailToLoadData(with error: Error) {
-        var errorMessage = "Произошла ошибка при загрузке данных"
-        
-        if let networkError = error as? NetworkError {
-            switch networkError {
-            case .noInternetConnection:
-                errorMessage = "Отсутствует подключение к интернету"
-            case .requestTimedOut:
-                errorMessage = "Превышено время ожидания ответа от сервера"
-            case .emptyData:
-                errorMessage = "Данные не были получены"
-            case .tooManyRequests:
-                errorMessage = "Вы превысили лимит запросов к API. Попробуйте снова позже."
-            case .unknownError:
-                errorMessage = "Неизвестная ошибка"
-            }
-        }
+        let errorMessage = NetworkErrorHandler.errorMessage(from: error)
         showError(message: errorMessage)
     }
     

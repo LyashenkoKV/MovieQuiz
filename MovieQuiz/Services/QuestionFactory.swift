@@ -38,52 +38,60 @@ final class QuestionFactory: QuestionFactoryProtocol {
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self else { return }
-            
-            guard movies.count > 0 else {
-                delegate?.didReceiveNextQuestion(question: nil)
-                return
-            }
-            var randomIndex: Int
-            
-            repeat {
-                randomIndex = Int.random(in: 0..<movies.count)
-            } while askedQuestions.contains(randomIndex)
-            
-            guard let movie = self.movies[safe: randomIndex] else { return }
-            var imageData = Data()
-            
-            do {
-                imageData = try Data(contentsOf: movie.resizedImageURL)
-            } catch {
-                errorHandler?(error)
-                return
-            }
-            
-            let rating = Float(movie.rating ?? "") ?? 0
-            let randomRating = Int.random(in: 6...9)
-            var compare: String
-            let correctAnswer: Bool
-            
-            if rating > Float(randomRating) {
-                compare = "больше"
-                correctAnswer = true
-            } else if rating < Float(randomRating) {
-                compare = "меньше"
-                correctAnswer = true
-            } else {
-                compare = "равен"
-                correctAnswer = true
-            }
-            
-            let text = "Рейтинг этого фильма \(compare) \(randomRating)?"
-            let question = QuizQuestion(image: imageData, text: text, correctAnswer: correctAnswer)
-            askedQuestions.insert(randomIndex)
-            
+            guard let question = self.generateNextQuestion() else { return }
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
-                delegate?.didReceiveNextQuestion(question: question)
+                self.delegate?.didReceiveNextQuestion(question: question)
             }
         }
+    }
+
+    private func generateNextQuestion() -> QuizQuestion? {
+        guard movies.count > 0 else {
+            delegate?.didReceiveNextQuestion(question: nil)
+            return nil
+        }
+        guard let randomIndex = generateRandomIndex() else { return nil }
+        guard let movie = movies[safe: randomIndex] else { return nil }
+        
+        guard let imageData = try? Data(contentsOf: movie.resizedImageURL) else {
+            errorHandler?(NetworkError.unknownError)
+            return nil
+        }
+        
+        let randomRating = Int.random(in: 6...9)
+        let compare = getComparisonString(movieRating: movie.rating, randomRating: randomRating)
+        let correctAnswer = getCorrectAnswer(movieRating: movie.rating, randomRating: randomRating)
+        
+        let text = "Рейтинг этого фильма \(compare) \(randomRating)?"
+        let question = QuizQuestion(image: imageData, text: text, correctAnswer: correctAnswer)
+        askedQuestions.insert(randomIndex)
+        
+        return question
+    }
+
+    private func generateRandomIndex() -> Int? {
+        var randomIndex: Int
+        repeat {
+            randomIndex = Int.random(in: 0..<movies.count)
+        } while askedQuestions.contains(randomIndex)
+        return randomIndex
+    }
+
+    private func getComparisonString(movieRating: String?, randomRating: Int) -> String {
+        guard let rating = Float(movieRating ?? "") else { return "" }
+        if rating > Float(randomRating) {
+            return "больше"
+        } else if rating < Float(randomRating) {
+            return "меньше"
+        } else {
+            return "равен"
+        }
+    }
+
+    private func getCorrectAnswer(movieRating: String?, randomRating: Int) -> Bool {
+        guard let rating = Float(movieRating ?? "") else { return false }
+        return rating > Float(randomRating) || rating < Float(randomRating)
     }
 
     func resetState() {
