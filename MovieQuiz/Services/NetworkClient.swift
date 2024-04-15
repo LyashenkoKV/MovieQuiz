@@ -16,13 +16,13 @@ enum NetworkError: Error {
 }
 
 struct NetworkClient: NetworkRoutingProtocol {
-    
+    // MARK: - Fetch
     func fetch(url: URL, handler: @escaping (Result<Data, Error>) -> Void) {
         let request = URLRequest(url: url)
         
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            
             if let response = response as? HTTPURLResponse {
+                print(response.statusCode)
                 switch response.statusCode {
                 case 429:
                     handler(.failure(NetworkError.tooManyRequests))

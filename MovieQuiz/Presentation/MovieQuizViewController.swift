@@ -82,9 +82,11 @@ final class MovieQuizViewController: UIViewController {
             statisticService.store(correct: correctAnswers, total: questionsAmount)
             let bestGame = statisticService.bestGame
             let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(statisticService.gamesCount)\nРекорд: \(bestGame.correct)/\(questionsAmount) (\(bestGame.date.dateTimeString))\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
-            let statistic = AlertModel(title: "Этот раунд окончен!",
+            let title = "Этот раунд окончен!"
+            let buttonText = "Сыграть еще раз"
+            let statistic = AlertModel(title: title,
                                        message: message,
-                                       buttonText: "Сыграть еще раз") { [weak self] in
+                                       buttonText: buttonText, context: .gameOver) { [weak self] in
                 guard let self else { return }
                 self.restartQuiz()
             }
@@ -109,9 +111,11 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showError(message: String) {
+        let buttonText = "Попробовать еще раз?"
+        let title = "Ошибка"
         DispatchQueue.main.async {
             self.activityIndicator.stopAnimating()
-            let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз?") { [weak self] in
+            let model = AlertModel(title: title, message: message, buttonText: buttonText, context: .error) { [weak self] in
                 guard let self = self else { return }
                 self.activityIndicator.startAnimating()
                 self.moviesLoader?.loadMovies { result in
@@ -126,7 +130,6 @@ final class MovieQuizViewController: UIViewController {
             self.alertPresenter.showAlert(with: model)
         }
     }
-
     
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {

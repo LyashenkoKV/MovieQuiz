@@ -24,7 +24,7 @@ struct MoviesLoader: MoviesLoading {
         }
         return url
     }
-    
+    // MARK: - LoadMovies
     func loadMovies(handler: @escaping (Result<MostPopularMovies, Error>) -> Void) {
         let decoder = JSONDecoder()
         
