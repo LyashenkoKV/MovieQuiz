@@ -36,7 +36,7 @@ final class MovieQuizViewController: UIViewController {
         previewImage.layer.cornerRadius = 15
         activityIndicator.hidesWhenStopped = true
         
-        let moviesLoader = MoviesLoader()
+        let moviesLoader = MoviesLoader(networkClient: NetworkClient())
         let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] error in
             guard let self else { return }
             let errorMessage = NetworkErrorHandler.errorMessage(from: error)

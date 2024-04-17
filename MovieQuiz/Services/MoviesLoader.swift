@@ -13,7 +13,7 @@ struct MoviesLoader: MoviesLoading {
     private let imdbURL = "https://tv-api.com/en/API/Top250Movies/"
     private let apiKeys = "k_zcuw1ytf"
     
-    init(networkClient: NetworkRoutingProtocol = NetworkClient()) {
+    init(networkClient: NetworkRoutingProtocol) {
         self.networkClient = networkClient
     }
     
