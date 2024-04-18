@@ -37,17 +37,15 @@ final class MovieQuizViewController: UIViewController {
         activityIndicator.hidesWhenStopped = true
         
         let moviesLoader = MoviesLoader(networkClient: NetworkClient())
-        let questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] error in
+        questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] error in
             guard let self else { return }
             let errorMessage = NetworkErrorHandler.errorMessage(from: error)
             self.showError(message: errorMessage) {
                 self.restartQuiz()
             }
         }
-        
-        self.questionFactory = questionFactory
         activityIndicator.startAnimating()
-        questionFactory.loadData()
+        questionFactory?.loadData()
         
         statisticService = StatisticServiceImplementation()
         alertPresenter.delegate = self
@@ -121,6 +119,9 @@ final class MovieQuizViewController: UIViewController {
             let model = AlertModel(title: title, message: message, buttonText: buttonText, context: .error) { [weak self] in
                 guard let self = self else { return }
                 self.activityIndicator.startAnimating()
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                self.questionFactory?.loadData()
                 errorHandler?()
             }
             self.alertPresenter.showAlert(with: model)

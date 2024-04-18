@@ -7,6 +7,15 @@
 
 import Foundation
 
+enum NetworkError: Error {
+    case noInternetConnection
+    case requestTimedOut
+    case emptyData
+    case tooManyRequests
+    case unknownError
+    case serviceUnavailable
+}
+
 struct NetworkErrorHandler: NetworkErrorProtocol {
     
     static func errorMessage(from error: Error) -> String {
@@ -24,6 +33,8 @@ struct NetworkErrorHandler: NetworkErrorProtocol {
                 errorMessage = "Вы превысили лимит запросов к API. Попробуйте снова позже."
             case .unknownError:
                 errorMessage = "Неизвестная ошибка"
+            case .serviceUnavailable:
+                errorMessage = "Сервис недоступен. Попробуйте снова позже."
             }
         }
         return errorMessage

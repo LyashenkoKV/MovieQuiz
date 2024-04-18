@@ -7,13 +7,6 @@
 
 import Foundation
 
-enum NetworkError: Error {
-    case noInternetConnection
-    case requestTimedOut
-    case emptyData
-    case tooManyRequests
-    case unknownError
-}
 
 struct NetworkClient: NetworkRoutingProtocol {
     // MARK: - Fetch
@@ -32,6 +25,8 @@ struct NetworkClient: NetworkRoutingProtocol {
                     } else {
                         handler(.failure(NetworkError.emptyData))
                     }
+                case 503:
+                    handler(.failure(NetworkError.serviceUnavailable))
                 default:
                     handler(.failure(NetworkError.unknownError))
                 }
