@@ -8,5 +8,5 @@
 import Foundation
 
 protocol QuizConverterProtocol {
-    static func convert(model: QuizQuestion, currentIndex: Int, totalCount: Int) -> QuizStepViewModel
+    func convert(model: QuizQuestion) -> QuizStepViewModel
 }
