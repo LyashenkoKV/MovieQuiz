@@ -10,8 +10,8 @@ import UIKit
 final class MovieQuizPresenter: QuizPresenterProtocol {
     
     weak var viewController: MovieQuizViewControllerProtocol?
-    private let questionsAmount = 10
-    private var currentQuestionIndex = 0
+    let questionsAmount = 10
+    var currentQuestionIndex = 0
     
     // Счетчик правильных ответов
     var correctAnswers = 0
