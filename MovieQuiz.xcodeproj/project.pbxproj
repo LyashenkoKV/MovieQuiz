@@ -186,7 +186,6 @@
 				24AF985B2BA9DE6800DD40F7 /* QuestionFactoryDelegate.swift */,
 				24AF984F2BA844C100DD40F7 /* QuestionFactory.swift */,
 				2436ED992BCD378500B80D39 /* QuizPresenterProtocol.swift */,
-				24AF98572BA84E0D00DD40F7 /* MovieQuizPresenter.swift */,
 				24CF4F2B2BC7E882001FF850 /* NetworkRoutingProtocol.swift */,
 				24AF98932BBD517B00DD40F7 /* NetworkClient.swift */,
 				24AF989B2BBE95F800DD40F7 /* MoviesLoadingProtocol.swift */,
@@ -196,6 +195,7 @@
 				24E9AB322BCDC306002DE907 /* NetworkErrorProtocol.swift */,
 				24E9AB342BCDC373002DE907 /* NetworkErrorHandler.swift */,
 				24E2AEE02BD2916300B660DB /* MovieQuizViewControllerProtocol.swift */,
+				24AF98572BA84E0D00DD40F7 /* MovieQuizPresenter.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";

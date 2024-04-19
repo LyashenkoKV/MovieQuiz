@@ -93,6 +93,4 @@ final class MovieQuizPresenterTests: XCTestCase {
         XCTAssertEqual(sut.correctAnswers, 0)
         XCTAssertEqual(sut.currentQuestionIndex, 0)
     }
-    
-    
 }
