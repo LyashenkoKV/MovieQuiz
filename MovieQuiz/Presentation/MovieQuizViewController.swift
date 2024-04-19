@@ -22,8 +22,6 @@ final class MovieQuizViewController: UIViewController {
         previewImage.layer.cornerRadius = 15
         activityIndicator.hidesWhenStopped = true
         presenter = MovieQuizPresenter(viewController: self)
-        guard let presenter = presenter else { return }
-        presenter.questionFactory?.loadData()
     }
     
     func show(quiz step: QuizStepViewModel) {
@@ -31,6 +29,14 @@ final class MovieQuizViewController: UIViewController {
         previewImage.image = step.image
         questionLabel.text = step.question
     }
+    
+    func showAnswerResult(isCorrect: Bool) {
+        previewImage.layer.masksToBounds = true
+        previewImage.layer.borderWidth = 8
+        previewImage.layer.cornerRadius = 15
+        previewImage.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+    }
+    
     
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {

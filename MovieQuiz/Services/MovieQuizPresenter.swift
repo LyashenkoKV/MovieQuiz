@@ -112,27 +112,21 @@ final class MovieQuizPresenter: QuizConverterProtocol {
     
     func compare(givenAnswer: Bool) {
         guard let currentQuestion = currentQuestion else { return }
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        let isCorrect = givenAnswer == currentQuestion.correctAnswer
+        viewController?.showAnswerResult(isCorrect: isCorrect)
+        
+        if isCorrect {
+            correctAnswers += 1
+        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.viewController?.previewImage.layer.borderWidth = 0
             self.showNextQuestionOrResults()
             self.viewController?.yesButton.isEnabled = true
             self.viewController?.noButton.isEnabled = true
         }
     }
-    
-    private func showAnswerResult(isCorrect: Bool) {
-        viewController?.previewImage.layer.masksToBounds = true
-        viewController?.previewImage.layer.borderWidth = 8
-        viewController?.previewImage.layer.cornerRadius = 15
-        viewController?.previewImage.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
-        if isCorrect {
-            correctAnswers += 1
-        }
-    } 
 }
 
 extension MovieQuizPresenter: QuestionFactoryDelegate {
