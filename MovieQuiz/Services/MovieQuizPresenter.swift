@@ -9,7 +9,7 @@ import UIKit
 
 final class MovieQuizPresenter: QuizPresenterProtocol {
     
-    weak var viewController: MovieQuizViewController?
+    weak var viewController: MovieQuizViewControllerProtocol?
     private let questionsAmount = 10
     private var currentQuestionIndex = 0
     
@@ -26,7 +26,7 @@ final class MovieQuizPresenter: QuizPresenterProtocol {
     // Загрузчик фильмов
     private var moviesLoader: MoviesLoading?
     
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         statisticService = StatisticServiceImplementation()
         alertPresenter.delegate = self
@@ -156,7 +156,9 @@ extension MovieQuizPresenter: QuestionFactoryDelegate {
 extension MovieQuizPresenter: AlertPresenterDelegate {
     func presentAlert(_ alert: UIAlertController) {
         DispatchQueue.main.async {
-            self.viewController?.present(alert, animated: true)
+            if let viewController = self.viewController as? UIViewController {
+                viewController.present(alert, animated: true)
+            }
         }
     }
 }
