@@ -8,6 +8,9 @@
 import UIKit
 
 final class MovieQuizPresenter: QuizConverterProtocol {
+    
+    weak var viewController: MovieQuizViewController?
+    var currentQuestion: QuizQuestion?
     let questionsAmount = 10
     private var currentQuestionIndex = 0
     
@@ -29,4 +32,5 @@ final class MovieQuizPresenter: QuizConverterProtocol {
     func switchToNextQuestion() {
         currentQuestionIndex += 1
     }
+    
 }

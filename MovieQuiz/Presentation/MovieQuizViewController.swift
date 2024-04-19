@@ -3,16 +3,16 @@ import UIKit
 final class MovieQuizViewController: UIViewController {
     // MARK: - IBOutlets
     @IBOutlet private weak var counterLabel: UILabel!
-    @IBOutlet private weak var previewImage: UIImageView!
+    @IBOutlet weak var previewImage: UIImageView!
     @IBOutlet private weak var questionLabel: UILabel!
-    @IBOutlet private weak var yesButton: UIButton!
-    @IBOutlet private weak var noButton: UIButton!
+    @IBOutlet weak var yesButton: UIButton!
+    @IBOutlet weak var noButton: UIButton!
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // Презентер
     private let presenter = MovieQuizPresenter()
     // Счетчик правильных ответов
-    private var correctAnswers = 0
+    var correctAnswers = 0
     // Фабрика вопросов
     private var questionFactory: QuestionFactoryProtocol?
     // Вопрос, который видит пользователь
@@ -34,7 +34,11 @@ final class MovieQuizViewController: UIViewController {
         previewImage.layer.cornerRadius = 15
         activityIndicator.hidesWhenStopped = true
         
-        let moviesLoader = MoviesLoader(networkClient: NetworkClient())
+        presenter.viewController = self
+        
+        self.moviesLoader = MoviesLoader(networkClient: NetworkClient())
+        guard let moviesLoader = self.moviesLoader else { return }
+        
         questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] error in
             guard let self else { return }
             let errorMessage = NetworkErrorHandler.errorMessage(from: error)
@@ -50,31 +54,7 @@ final class MovieQuizViewController: UIViewController {
     }
     
     // MARK: - Methods
-    private func compare(givenAnswer: Bool) {
-        guard let currentQuestion = currentQuestion else { return }
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
-            self.previewImage.layer.borderWidth = 0
-            self.showNextQuestionOrResults()
-            self.yesButton.isEnabled = true
-            self.noButton.isEnabled = true
-        }
-    }
-    
-    private func showAnswerResult(isCorrect: Bool) {
-        previewImage.layer.masksToBounds = true
-        previewImage.layer.borderWidth = 8
-        previewImage.layer.cornerRadius = 15
-        previewImage.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
-        if isCorrect {
-            correctAnswers += 1
-        }
-    }
-    
-    private func showNextQuestionOrResults() {
+    func showNextQuestionOrResults() {
         guard let statisticService = statisticService else { return }
         
         if presenter.isLastQuestion() {
@@ -123,6 +103,30 @@ final class MovieQuizViewController: UIViewController {
                 errorHandler?()
             }
             self.alertPresenter.showAlert(with: model)
+        }
+    }
+    
+    func compare(givenAnswer: Bool) {
+        guard let currentQuestion = currentQuestion else { return }
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self else { return }
+            self.previewImage.layer.borderWidth = 0
+            self.showNextQuestionOrResults()
+            self.yesButton.isEnabled = true
+            self.noButton.isEnabled = true
+        }
+    }
+    
+    private func showAnswerResult(isCorrect: Bool) {
+        previewImage.layer.masksToBounds = true
+        previewImage.layer.borderWidth = 8
+        previewImage.layer.cornerRadius = 15
+        previewImage.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        
+        if isCorrect {
+            correctAnswers += 1
         }
     }
     
