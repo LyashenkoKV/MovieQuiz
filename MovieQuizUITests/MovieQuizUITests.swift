@@ -55,7 +55,7 @@ final class MovieQuizUITests: XCTestCase {
     
     func testIndexLabel() {
         let indexLabel = app.staticTexts["Index"]
-        XCTAssertEqual(indexLabel.label, "1/10")
+        XCTAssertEqual(indexLabel.label, "0/10")
     }
     
     func testGameAlert() {
@@ -83,7 +83,7 @@ final class MovieQuizUITests: XCTestCase {
         let indexLabel = app.staticTexts["Index"]
         
         XCTAssertFalse(gameAlert.exists)
-        XCTAssertTrue(indexLabel.label == "1/10")
+        XCTAssertTrue(indexLabel.label == "0/10")
     }
     
     func testQuestionLabel() {
