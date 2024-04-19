@@ -1,6 +1,7 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
+    
     // MARK: - IBOutlets
     @IBOutlet private weak var counterLabel: UILabel!
     @IBOutlet weak var previewImage: UIImageView!
@@ -37,16 +38,29 @@ final class MovieQuizViewController: UIViewController {
         previewImage.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
     }
     
+    func showLoadingIndicator() {
+        activityIndicator.startAnimating()
+    }
+    
+    func hideLoadingIndicator() {
+        activityIndicator.stopAnimating()
+    }
+    
+    func updatePreviewImageBorderWidth(to borderWidth: CGFloat) {
+        previewImage.layer.borderWidth = borderWidth
+    }
+    
+    func setButtonsInteractionEnabled(_ enabled: Bool) {
+        yesButton.isUserInteractionEnabled = enabled
+        noButton.isUserInteractionEnabled = enabled
+    }
+    
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
         presenter?.compare(givenAnswer: true)
     }
     
     @IBAction private func noButtonTapped(_ sender: UIButton) {
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
         presenter?.compare(givenAnswer: false)
     }
 }

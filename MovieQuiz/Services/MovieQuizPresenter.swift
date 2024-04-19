@@ -42,7 +42,7 @@ final class MovieQuizPresenter: QuizPresenterProtocol {
             }
         }
         questionFactory?.loadData()
-        viewController.activityIndicator.startAnimating()
+        viewController.showLoadingIndicator()
     }
     
     func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -98,10 +98,10 @@ final class MovieQuizPresenter: QuizPresenterProtocol {
         let buttonText = "Попробовать еще раз?"
         let title = "Ошибка"
         DispatchQueue.main.async {
-            self.viewController?.activityIndicator.stopAnimating()
+            self.viewController?.hideLoadingIndicator()
             let model = AlertModel(title: title, message: message, buttonText: buttonText, context: .error) { [weak self] in
                 guard let self = self else { return }
-                self.viewController?.activityIndicator.startAnimating()
+                self.viewController?.showLoadingIndicator()
                 self.resetQuestionIndex()
                 self.correctAnswers = 0
                 self.questionFactory?.loadData()
@@ -120,19 +120,20 @@ final class MovieQuizPresenter: QuizPresenterProtocol {
             correctAnswers += 1
         }
         
+        viewController?.setButtonsInteractionEnabled(false)
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self else { return }
-            self.viewController?.previewImage.layer.borderWidth = 0
+            self.viewController?.updatePreviewImageBorderWidth(to: 0)
+            self.viewController?.setButtonsInteractionEnabled(true)
             self.showNextQuestionOrResults()
-            self.viewController?.yesButton.isEnabled = true
-            self.viewController?.noButton.isEnabled = true
         }
     }
 }
 
 extension MovieQuizPresenter: QuestionFactoryDelegate {
     func didLoadDataFromServer() {
-        viewController?.activityIndicator.startAnimating()
+        viewController?.showLoadingIndicator()
         questionFactory?.requestNextQuestion()
     }
     
@@ -147,7 +148,7 @@ extension MovieQuizPresenter: QuestionFactoryDelegate {
         let viewModel = convert(model: question)
         DispatchQueue.main.async {
             self.viewController?.show(quiz: viewModel)
-            self.viewController?.activityIndicator.stopAnimating()
+            self.viewController?.hideLoadingIndicator()
         }
     }
 }
