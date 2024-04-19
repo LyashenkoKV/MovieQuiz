@@ -7,18 +7,18 @@
 
 import UIKit
 
-final class MovieQuizPresenter: QuizConverterProtocol {
+final class MovieQuizPresenter: QuizPresenterProtocol {
     
-    private weak var viewController: MovieQuizViewController?
+    weak var viewController: MovieQuizViewController?
     private let questionsAmount = 10
     private var currentQuestionIndex = 0
     
     // Счетчик правильных ответов
     var correctAnswers = 0
     // Фабрика вопросов
-    var questionFactory: QuestionFactoryProtocol?
+    private var questionFactory: QuestionFactoryProtocol?
     // Вопрос, который видит пользователь
-    private var currentQuestion: QuizQuestion?
+    internal var currentQuestion: QuizQuestion?
     // Показ результатов
     private var alertPresenter = AlertPresenter()
     // Статистика игр
@@ -32,7 +32,8 @@ final class MovieQuizPresenter: QuizConverterProtocol {
         alertPresenter.delegate = self
         
         self.moviesLoader = MoviesLoader(networkClient: NetworkClient())
-        guard let moviesLoader = self.moviesLoader else { return }
+        guard let moviesLoader = moviesLoader else { return }
+        
         questionFactory = QuestionFactory(delegate: self, moviesLoader: moviesLoader) { [weak self] error in
             guard let self else { return }
             let errorMessage = NetworkErrorHandler.errorMessage(from: error)
@@ -86,7 +87,7 @@ final class MovieQuizPresenter: QuizConverterProtocol {
         }
     }
     
-    private func restartQuiz() {
+    func restartQuiz() {
         resetQuestionIndex()
         correctAnswers = 0
         questionFactory?.resetState()

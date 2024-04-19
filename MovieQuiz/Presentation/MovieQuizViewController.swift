@@ -37,7 +37,6 @@ final class MovieQuizViewController: UIViewController {
         previewImage.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
     }
     
-    
     // MARK: - IBActions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
         yesButton.isEnabled = false
