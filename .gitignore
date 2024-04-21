@@ -3,4 +3,5 @@
 /Packages
 xcuserdata/
 DerivedData/
+xcshareddata/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata

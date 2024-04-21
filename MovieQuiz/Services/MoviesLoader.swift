@@ -9,9 +9,13 @@ import Foundation
 
 struct MoviesLoader: MoviesLoading {
     // MARK: - NetworkClient
-    private let networkClient = NetworkClient()
+    private let networkClient: NetworkRoutingProtocol
     private let imdbURL = "https://tv-api.com/en/API/Top250Movies/"
     private let apiKeys = "k_zcuw1ytf"
+    
+    init(networkClient: NetworkRoutingProtocol) {
+        self.networkClient = networkClient
+    }
     
     // MARK: - URL
     private var mostPopularMoviesUrl: URL {
@@ -20,7 +24,7 @@ struct MoviesLoader: MoviesLoading {
         }
         return url
     }
-    
+    // MARK: - LoadMovies
     func loadMovies(handler: @escaping (Result<MostPopularMovies, Error>) -> Void) {
         let decoder = JSONDecoder()
         
@@ -36,7 +40,6 @@ struct MoviesLoader: MoviesLoading {
                         handler(.success(decodedData))
                     }
                 } catch {
-                    print(error.localizedDescription)
                     handler(.failure(error))
                 }
             case .failure(let error):

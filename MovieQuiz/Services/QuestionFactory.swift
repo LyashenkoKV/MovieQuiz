@@ -20,6 +20,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
         self.errorHandler = errorHandler
     }
     
+    // MARK: - loadData
     func loadData() {
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
@@ -34,58 +35,85 @@ final class QuestionFactory: QuestionFactoryProtocol {
             }
         }
     }
-    
+    // MARK: - requestNextQuestion
     func requestNextQuestion() {
-        DispatchQueue.global().async { [weak self] in
-            guard let self else { return }
-            
-            guard movies.count > 0 else {
-                delegate?.didReceiveNextQuestion(question: nil)
-                return
-            }
-            var randomIndex: Int
-            
-            repeat {
-                randomIndex = Int.random(in: 0..<movies.count)
-            } while askedQuestions.contains(randomIndex)
-            
-            guard let movie = self.movies[safe: randomIndex] else { return }
-            var imageData = Data()
-            
-            do {
-                imageData = try Data(contentsOf: movie.resizedImageURL)
-            } catch {
-                errorHandler?(error)
-                return
-            }
-            
-            let rating = Float(movie.rating ?? "") ?? 0
-            let randomRating = Int.random(in: 6...9)
-            var compare: String
-            let correctAnswer: Bool
-            
-            if rating > Float(randomRating) {
-                compare = "больше"
-                correctAnswer = true
-            } else if rating < Float(randomRating) {
-                compare = "меньше"
-                correctAnswer = true
-            } else {
-                compare = "равен"
-                correctAnswer = true
-            }
-            
-            let text = "Рейтинг этого фильма \(compare) \(randomRating)?"
-            let question = QuizQuestion(image: imageData, text: text, correctAnswer: correctAnswer)
-            askedQuestions.insert(randomIndex)
-            
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                delegate?.didReceiveNextQuestion(question: question)
+        generateNextQuestion { [weak self] question in
+            guard let self = self, let question = question else { return }
+            DispatchQueue.main.async {
+                self.delegate?.didReceiveNextQuestion(question: question)
             }
         }
     }
+    // MARK: - generateNextQuestion
+    private func generateNextQuestion(completion: @escaping (QuizQuestion?) -> Void) {
+        guard movies.count > 0 else {
+            completion(nil)
+            return
+        }
+        guard let randomIndex = generateRandomIndex() else {
+            completion(nil)
+            return
+        }
+        guard let movie = movies[safe: randomIndex] else {
+            completion(nil)
+            return
+        }
 
+        let url = movie.resizedImageURL
+
+        URLSession.shared.dataTask(with: url) { [weak self] (data, _, error) in
+            guard let self else { return }
+
+            if let error = error {
+                self.errorHandler?(error)
+                completion(nil)
+                return
+            }
+
+            guard let data = data else {
+                self.errorHandler?(NetworkError.emptyData)
+                completion(nil)
+                return
+            }
+
+            let randomRating = Int.random(in: 6...9)
+            let compare = self.getComparisonString(movieRating: movie.rating, randomRating: randomRating)
+            let correctAnswer = self.getCorrectAnswer(movieRating: movie.rating, randomRating: randomRating)
+
+            let text = "Рейтинг этого фильма \(compare) \(randomRating)?"
+            let question = QuizQuestion(image: data, text: text, correctAnswer: correctAnswer)
+            self.askedQuestions.insert(randomIndex)
+
+            DispatchQueue.main.async {
+                completion(question)
+            }
+        }.resume()
+    }
+// MARK: - generateRandomIndex
+    private func generateRandomIndex() -> Int? {
+        var randomIndex: Int
+        repeat {
+            randomIndex = Int.random(in: 0..<movies.count)
+        } while askedQuestions.contains(randomIndex)
+        return randomIndex
+    }
+// MARK: - getComparisonString
+    private func getComparisonString(movieRating: String?, randomRating: Int) -> String {
+        guard let rating = Float(movieRating ?? "") else { return "" }
+        if rating > Float(randomRating) {
+            return "больше"
+        } else if rating < Float(randomRating) {
+            return "меньше"
+        } else {
+            return "равен"
+        }
+    }
+// MARK: - getCorrectAnswer
+    private func getCorrectAnswer(movieRating: String?, randomRating: Int) -> Bool {
+        guard let rating = Float(movieRating ?? "") else { return false }
+        return rating > Float(randomRating) || rating < Float(randomRating)
+    }
+// MARK: - resetState
     func resetState() {
         askedQuestions.removeAll()
     }
