@@ -41,11 +41,11 @@ final class MovieQuizPresenterTests: XCTestCase {
     
     func testPresenterConvertModel() throws {
         let viewControllerMock = MovieQuizViewControllerMock()
-        let sut = MovieQuizPresenter(viewController: viewControllerMock)
+        let presenter = MovieQuizPresenter(viewController: viewControllerMock)
         
         let emptyData = Data()
         let question = QuizQuestion(image: emptyData, text: "Question Text", correctAnswer: true)
-        let viewModel = sut.convert(model: question)
+        let viewModel = presenter.convert(model: question)
         
         XCTAssertNotNil(viewModel.image)
         XCTAssertEqual(viewModel.question, "Question Text")
@@ -54,43 +54,43 @@ final class MovieQuizPresenterTests: XCTestCase {
     
     func testPresenterCompareWithCorrectAnswer() throws {
         let viewControllerMock = MovieQuizViewControllerMock()
-        let sut = MovieQuizPresenter(viewController: viewControllerMock)
+        let presenter = MovieQuizPresenter(viewController: viewControllerMock)
         
         let question = QuizQuestion(image: Data(), text: "Question Text", correctAnswer: true)
-        sut.currentQuestion = question
-        sut.compare(givenAnswer: true)
+        presenter.currentQuestion = question
+        presenter.compare(givenAnswer: true)
 
         XCTAssertTrue(viewControllerMock.setButtonsInteractionEnabledCalled)
     }
     
     func testPresenterCompareWithIncorrectAnswer() throws {
         let viewControllerMock = MovieQuizViewControllerMock()
-        let sut = MovieQuizPresenter(viewController: viewControllerMock)
+        let presenter = MovieQuizPresenter(viewController: viewControllerMock)
         
         let question = QuizQuestion(image: Data(), text: "Question Text", correctAnswer: true)
-        sut.currentQuestion = question
-        sut.compare(givenAnswer: false)
+        presenter.currentQuestion = question
+        presenter.compare(givenAnswer: false)
         
-        XCTAssertEqual(sut.correctAnswers, 0)
+        XCTAssertEqual(presenter.correctAnswers, 0)
     }
     
     func testPresenterIsLastQuestion() throws {
         let viewControllerMock = MovieQuizViewControllerMock()
-        let sut = MovieQuizPresenter(viewController: viewControllerMock)
-        sut.currentQuestionIndex = sut.questionsAmount - 1
+        let presenter = MovieQuizPresenter(viewController: viewControllerMock)
+        presenter.currentQuestionIndex = presenter.questionsAmount - 1
         
-        XCTAssertTrue(sut.isLastQuestion())
+        XCTAssertTrue(presenter.isLastQuestion())
     }
     
     func testPresenterRestartQuiz() throws {
         let viewControllerMock = MovieQuizViewControllerMock()
-        let sut = MovieQuizPresenter(viewController: viewControllerMock)
+        let presenter = MovieQuizPresenter(viewController: viewControllerMock)
         
-        sut.correctAnswers = 5
-        sut.currentQuestionIndex = 3
-        sut.restartQuiz()
+        presenter.correctAnswers = 5
+        presenter.currentQuestionIndex = 3
+        presenter.restartQuiz()
         
-        XCTAssertEqual(sut.correctAnswers, 0)
-        XCTAssertEqual(sut.currentQuestionIndex, 0)
+        XCTAssertEqual(presenter.correctAnswers, 0)
+        XCTAssertEqual(presenter.currentQuestionIndex, 0)
     }
 }

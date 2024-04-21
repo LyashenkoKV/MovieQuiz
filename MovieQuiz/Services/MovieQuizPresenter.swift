@@ -10,22 +10,17 @@ import UIKit
 final class MovieQuizPresenter: QuizPresenterProtocol {
     
     weak var viewController: MovieQuizViewControllerProtocol?
-    let questionsAmount = 10
-    var currentQuestionIndex = 0
     
-    // Счетчик правильных ответов
-    var correctAnswers = 0
-    // Фабрика вопросов
     private var questionFactory: QuestionFactoryProtocol?
-    // Вопрос, который видит пользователь
-    internal var currentQuestion: QuizQuestion?
-    // Показ результатов
     private var alertPresenter = AlertPresenter()
-    // Статистика игр
     private var statisticService: StatisticServiceProtocol?
-    // Загрузчик фильмов
     private var moviesLoader: MoviesLoading?
     
+    let questionsAmount = 10
+    var currentQuestionIndex = 0
+    var correctAnswers = 0
+    var currentQuestion: QuizQuestion?
+
     init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         statisticService = StatisticServiceImplementation()

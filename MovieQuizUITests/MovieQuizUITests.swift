@@ -54,11 +54,13 @@ final class MovieQuizUITests: XCTestCase {
     }
     
     func testIndexLabel() {
+        sleep(2)
         let indexLabel = app.staticTexts["Index"]
         XCTAssertEqual(indexLabel.label, "0/10")
     }
     
     func testGameAlert() {
+        sleep(2)
         for _ in 0..<10 {
             app.buttons["Yes"].tap()
             sleep(2)
